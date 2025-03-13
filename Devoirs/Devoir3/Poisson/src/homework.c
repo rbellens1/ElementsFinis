@@ -27,8 +27,14 @@ void femPoissonFindBoundaryNodes(femPoissonProblem *theProblem)
     femMesh* theEdges = theGeometry->theEdges; 
     int nBoundary = 0;
     
-    //  A completer :-)
+    for (int i = 0; i < theEdges->nElem; i++) {
+        if (theEdges->elem[i*nBoundary] == 0) {
+            nBoundary++;
+        }
+    }
 
+    
+    
 
     femDomain *theBoundary = malloc(sizeof(femDomain));
     theGeometry->nDomains++;
@@ -39,7 +45,11 @@ void femPoissonFindBoundaryNodes(femPoissonProblem *theProblem)
     theBoundary->mesh = NULL;
     sprintf(theBoundary->name,"Boundary");
  
-    // A completer :-)
+    for (int i = 0; i < theEdges->nElem; i++) {
+        if (theEdges->elem[i*nBoundary] == 0) {
+            theBoundary->elem[i] = i; 
+        }
+    }
 
 }
     
@@ -48,8 +58,12 @@ void femPoissonFindBoundaryNodes(femPoissonProblem *theProblem)
 
 void femPoissonFree(femPoissonProblem *theProblem)
 {
-
-    // A completer :-)
+    femFullSystemFree(theProblem->system);
+    femIntegrationFree(theProblem->rule);
+    femDiscreteFree(theProblem->space);
+    geoMeshFree(theProblem->geo);
+    free(theProblem);
+    
 }
     
 # endif
@@ -58,9 +72,14 @@ void femPoissonFree(femPoissonProblem *theProblem)
 void femPoissonLocal(femPoissonProblem *theProblem, const int iElem, int *map, double *x, double *y)
 {
     femMesh *theMesh = theProblem->geo->theElements;
-    
-    //  A completer :-)
-
+    femDiscrete *theSpace = theProblem->space;
+    int nodes = theMesh->nLocalNode;
+    for (int i = 0; i < nodes; i++) {
+        int j = theMesh->elem[iElem*nodes+i];
+        x[i] = theMesh->nodes->X[j];
+        y[i] = theMesh->nodes->Y[j]; 
+        map[i] = j;
+    }
 }
 
 # endif
@@ -75,12 +94,86 @@ void femPoissonSolve(femPoissonProblem *theProblem)
     femIntegration *theRule = theProblem->rule;
     femDiscrete *theSpace = theProblem->space;
  
-    if (theSpace->n > 4) Error("Unexpected discrete space size !");  
-    double x[4],y[4],phi[4],dphidxsi[4],dphideta[4],dphidx[4],dphidy[4];
-    int iElem,iInteg,iEdge,i,j,map[4];
-    int nLocal = theMesh->nLocalNode;
+    int nLocalNode = theMesh->nLocalNode;
 
-    // A completer :-)
+    double **A = theSystem->A;
+    double *B = theSystem->B;
+
+    for(int iElem = 0; iElem < theMesh->nElem; iElem++){
+        double *x = malloc(nLocalNode*sizeof(double));
+        double *y = malloc(nLocalNode*sizeof(double));
+        int *map = malloc(nLocalNode*sizeof(int));
+
+        femPoissonLocal(theProblem,iElem,map,x,y);
+
+        for(int integral = 0; integral < theRule->n; integral++){
+            double weight = theRule->weight[integral];
+            double xsi = theRule->xsi[integral];
+            double eta = theRule->eta[integral];
+
+            double *phi = malloc(theSpace->n * sizeof(double));
+            femDiscretePhi2(theSpace,xsi,eta,phi);
+
+            double *dphidxsi = malloc(theSpace->n * sizeof(double));
+            double *dphideta = malloc(theSpace->n * sizeof(double));
+            femDiscreteDphi2(theSpace,xsi,eta,dphidxsi,dphideta);
+
+            double dxdxsi = 0;
+            double dxdeta = 0;
+            double dydxsi = 0;
+            double dydeta = 0;
+
+            for(int j = 0; j<theSpace->n; j++){
+                dxdxsi += dphidxsi[j]*x[j];
+                dxdeta += dphideta[j]*x[j];
+                dydxsi += dphidxsi[j]*y[j];
+                dydeta += dphideta[j]*y[j];
+            }
+
+            double Jacob = dxdxsi*dydeta - dxdeta*dydxsi;
+
+            if(Jacob < 0) {
+                int node = theMesh->elem[iElem*nLocalNode];
+                theMesh->elem[iElem*nLocalNode] = theMesh->elem[nLocalNode*iElem+2];
+                theMesh->elem[nLocalNode*iElem+2] = node;
+            }
+
+            Jacob = fabs(Jacob);
+
+            double *dphidx = malloc(theSpace->n * sizeof(double));
+            double *dphidy = malloc(theSpace->n * sizeof(double));
+
+            for(int i = 0; i<theSpace->n; i++){
+                dphidx[i] = (dphidxsi[i]*dydeta - dphideta[i]*dydxsi)/Jacob;
+                dphidy[i] = (dphideta[i]*dxdxsi - dphidxsi[i]*dxdeta)/Jacob;
+            }
+
+            for(int i = 0; i<theSpace->n; i++){
+                B[map[i]] += weight*phi[i]*Jacob;
+                for(int j = 0; j<theSpace->n; j++){
+                    A[map[i]][map[j]] += weight*(dphidx[i]*dphidx[j] + dphidy[i]*dphidy[j])*Jacob;
+                }
+            }
+            free(dphidxsi);
+            free(dphideta);
+            free(phi);
+            free(dphidx);
+            free(dphidy);
+        }
+
+        free(x);
+        free(y);
+        free(map);
+    }
+    femMesh *theEdges = theProblem->geo->theEdges;
+    for(int i = 0; i < theEdges->nElem; i++){
+        for(int j = 0; j < theEdges->nLocalNode; j++){
+            femFullSystemConstrain(theSystem,theEdges->elem[i*theEdges->nLocalNode+j],0.0);
+        }
+    }
+    
+    femFullSystemEliminate(theSystem);
+    
 }
 
 # endif

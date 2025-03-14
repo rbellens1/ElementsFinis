@@ -43,12 +43,12 @@ void geoMeshGenerate() {
 double *femElasticitySolve(femProblem *theProblem)
 {
 
-    femFullSystem  *theSystem = theProblem->system;
-    femIntegration *theRule = theProblem->rule;
-    femDiscrete    *theSpace = theProblem->space;
-    femGeo         *theGeometry = theProblem->geometry;
-    femNodes       *theNodes = theGeometry->theNodes;
-    femMesh        *theMesh = theGeometry->theElements;
+    femFullSystem  *theSystem = theProblem->system; // Systeme
+    femIntegration *theRule = theProblem->rule; // Points d'integration
+    femDiscrete    *theSpace = theProblem->space; // Espace des fonctions de forme
+    femGeo         *theGeometry = theProblem->geometry;  // Geometrie
+    femNodes       *theNodes = theGeometry->theNodes; // Noeuds
+    femMesh        *theMesh = theGeometry->theElements; // Maillage
     
     
     double x[4],y[4],phi[4],dphidxsi[4],dphideta[4],dphidx[4],dphidy[4];
@@ -67,7 +67,59 @@ double *femElasticitySolve(femProblem *theProblem)
     
   //
   //  A faire :-)
-  //                
+  //         
+    //  -1- Boucle sur les elements
+    //  -2- Boucle sur les noeuds du maillage
+    //  -3- Boucle sur les points d'integration
+    //  -4- Boucle sur les fonctions de forme
+    //  -5- Boucle sur les derivees des fonctions de forme
+
+    for(iElem = 0;iElem < theMesh->nElem; iElem++){ // Boucle sur les elements
+        for (j = 0; j < nLocal; j++){ // Boucle sur les noeuds du maillage
+            map[j] = theMesh->elem[nLocal*iElem+j]; // Numero du noeud j de l'element iElem
+            x[j] = theMesh->nodes->X[map[j]]; // Coordonnee x du noeud j de l'element iElem
+            y[j] = theMesh->nodes->Y[map[j]]; // Coordonnee y du noeud j de l'element iElem
+        }
+        for(iInteg = 0; iInteg < theRule->n; iInteg++){ // Boucle sur les points d'integration
+            double xsi = theRule->xsi[iInteg];
+            double eta = theRule->eta[iInteg];
+            double weight = theRule->weight[iInteg];
+            femDiscretePhi2(theSpace,xsi,eta,phi); // Calcul des fonctions de forme
+            femDiscreteDphi2(theSpace,xsi,eta,dphidxsi,dphideta); // Calcul des derivees des fonctions de forme
+            double xLocal = 0.0; // Coordonnee x du point d'integration
+            double yLocal = 0.0; // Coordonnee y du point d'integration
+            double dxdxsi = 0.0; // Derivee de x par rapport a xsi
+            double dydxsi = 0.0; // Derivee de y par rapport a xsi
+            double dxdeta = 0.0; // Derivee de x par rapport a eta
+            double dydeta = 0.0; // Derivee de y par rapport a eta
+            for(i = 0; i < theSpace->n; i++){ // Boucle sur les fonctions de forme
+                xLocal += x[i]*phi[i]; // Coordonnee x du point d'integration
+                yLocal += y[i]*phi[i]; // Coordonnee y du point d'integration
+                dxdxsi += x[i]*dphidxsi[i]; // Derivee de x par rapport a xsi
+                dydxsi += y[i]*dphidxsi[i]; // Derivee de y par rapport a xsi
+                dxdeta += x[i]*dphideta[i]; // Derivee de x par rapport a eta
+                dydeta += y[i]*dphideta[i]; // Derivee de y par rapport a eta
+            } 
+            double jacobian = fabs(dxdxsi*dydeta - dydxsi*dxdeta); 
+            for(i = 0; i < theSpace->n; i++){  // Boucle sur les derivees des fonctions de forme
+                dphidx[i] = (dphidxsi[i]*dydeta - dphideta[i]*dydxsi)/jacobian; // Derivee de phi par rapport a x
+                dphidy[i] = (dphideta[i]*dxdxsi - dphidxsi[i]*dxdeta)/jacobian; // Derivee de phi par rapport a y
+            }
+            for(i = 0; i < theSpace->n; i++){ 
+                for(j = 0; j < theSpace->n; j++){ 
+                    theSystem->A[map[i]*2][map[j]*2] += (dphidx[i] * a * dphidx[j] + dphidy[i] * c * dphidy[j]) * jacobian * weight;                                                                                       
+                    theSystem->A[map[i]*2][map[j]*2+1] += (dphidx[i] * b * dphidy[j] + dphidy[i] * c * dphidx[j]) * jacobian * weight;                                                                                 
+                    theSystem->A[map[i]*2+1][map[j]*2] += (dphidy[i] * b * dphidx[j] + dphidx[i] * c * dphidy[j]) * jacobian * weight;    
+                    theSystem->A[map[i]*2+1][map[j]*2+1] += (dphidy[i] * a * dphidy[j] + dphidx[i] * c * dphidx[j]) * jacobian * weight;
+                }
+                theSystem->B[map[i]*2] += (phi[i] * -rho * g + phi[i] * g)* jacobian *weight;
+                theSystem->B[map[i]*2+1] += (phi[i] * -rho * g + phi[i] * g)* jacobian *weight;
+            }
+        }
+        
+    }
+  
+    
                 
                 
   

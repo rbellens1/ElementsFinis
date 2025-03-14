@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "gmshc.h"
+#include "gmshc.h" 
 
 
 #define ErrorScan(a)   femErrorScan(a,__LINE__,__FILE__)
@@ -32,23 +32,23 @@ typedef enum {PLANAR_STRESS,PLANAR_STRAIN,AXISYM} femElasticCase;
 
 
 typedef struct {
-    int nNodes;
-    double *X;
-    double *Y;
+    int nNodes; // Nombre de noeuds
+    double *X; // Coordonnees X des noeuds
+    double *Y; // Coordonnees Y des noeuds
 } femNodes;
 
 typedef struct {
-    int nLocalNode;
-    int nElem;
-    int *elem;
-    femNodes *nodes;
+    int nLocalNode; // Nombre de noeuds locaux par element
+    int nElem; // Nombre d'elements dans le maillage
+    int *elem; // Liste des noeuds de chaque element du maillage
+    femNodes *nodes; // Noeuds du maillage
 } femMesh;
 
 typedef struct {
-    femMesh *mesh;
-    int nElem;
-    int *elem;
-    char name[MAXNAME];
+    femMesh *mesh; // Maillage
+    int nElem; // Nombre d'elements dans le domaine
+    int *elem; // Liste des elements du domaine
+    char name[MAXNAME]; // Nom du domaine
 } femDomain;
 
 typedef struct {
@@ -64,17 +64,17 @@ typedef struct {
 } femGeo;
 
 typedef struct {
-    int n;
-    void (*x2)(double *xsi, double *eta);
-    void (*phi2)(double xsi, double eta, double *phi);
-    void (*dphi2dx)(double xsi, double eta, double *dphidxsi, double *dphideta);
+    int n; // Nombre de points d'integration
+    void (*x2)(double *xsi, double *eta); // Coordonnees xsi et eta des points d'integration
+    void (*phi2)(double xsi, double eta, double *phi); // Fonctions de forme aux points d'integration
+    void (*dphi2dx)(double xsi, double eta, double *dphidxsi, double *dphideta); // Derivees des fonctions de forme aux points d'integration
 } femDiscrete;
     
 typedef struct {
-    int n;
-    const double *xsi;
-    const double *eta;
-    const double *weight;
+    int n; // Nombre de points d'integration
+    const double *xsi; // Coordonnees xsi des points d'integration
+    const double *eta; // Coordonnees eta des points d'integration
+    const double *weight; // Poids des points d'integration
 } femIntegration;
 
 typedef struct {
@@ -93,9 +93,9 @@ typedef struct {
 
 typedef struct {
     double E,nu,rho,g;
-    double A,B,C;
-    int planarStrainStress;
-    int nBoundaryConditions;
+    double A,B,C; 
+    int planarStrainStress; 
+    int nBoundaryConditions; 
     femBoundaryCondition **conditions;  
     int *constrainedNodes; 
     femGeo *geometry;

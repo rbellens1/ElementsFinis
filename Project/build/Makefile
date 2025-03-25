@@ -142,6 +142,19 @@ run/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
 .PHONY : run/fast
 
+#=============================================================================
+# Target rules for targets named glfw
+
+# Build rule for target.
+glfw: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 glfw
+.PHONY : glfw
+
+# fast build rule for target.
+glfw/fast:
+	$(MAKE) $(MAKESILENT) -f glfw/src/CMakeFiles/glfw.dir/build.make glfw/src/CMakeFiles/glfw.dir/build
+.PHONY : glfw/fast
+
 src/fem.o: src/fem.c.o
 .PHONY : src/fem.o
 
@@ -165,6 +178,30 @@ src/fem.s: src/fem.c.s
 src/fem.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/fem.c.s
 .PHONY : src/fem.c.s
+
+src/glfem.o: src/glfem.c.o
+.PHONY : src/glfem.o
+
+# target to build an object file
+src/glfem.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.o
+.PHONY : src/glfem.c.o
+
+src/glfem.i: src/glfem.c.i
+.PHONY : src/glfem.i
+
+# target to preprocess a source file
+src/glfem.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.i
+.PHONY : src/glfem.c.i
+
+src/glfem.s: src/glfem.c.s
+.PHONY : src/glfem.s
+
+# target to generate assembly for a file
+src/glfem.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myFem.dir/build.make CMakeFiles/myFem.dir/src/glfem.c.s
+.PHONY : src/glfem.c.s
 
 src/homework.o: src/homework.c.o
 .PHONY : src/homework.o
@@ -223,10 +260,14 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... run"
+	@echo "... glfw"
 	@echo "... myFem"
 	@echo "... src/fem.o"
 	@echo "... src/fem.i"
 	@echo "... src/fem.s"
+	@echo "... src/glfem.o"
+	@echo "... src/glfem.i"
+	@echo "... src/glfem.s"
 	@echo "... src/homework.o"
 	@echo "... src/homework.i"
 	@echo "... src/homework.s"

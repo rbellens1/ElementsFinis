@@ -86,10 +86,24 @@ CMakeFiles/myFem.dir/src/fem.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myFem.dir/src/fem.c.s"
 	/Library/Developer/CommandLineTools/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/fem.c -o CMakeFiles/myFem.dir/src/fem.c.s
 
+CMakeFiles/myFem.dir/src/glfem.c.o: CMakeFiles/myFem.dir/flags.make
+CMakeFiles/myFem.dir/src/glfem.c.o: /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/glfem.c
+CMakeFiles/myFem.dir/src/glfem.c.o: CMakeFiles/myFem.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/myFem.dir/src/glfem.c.o"
+	/Library/Developer/CommandLineTools/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myFem.dir/src/glfem.c.o -MF CMakeFiles/myFem.dir/src/glfem.c.o.d -o CMakeFiles/myFem.dir/src/glfem.c.o -c /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/glfem.c
+
+CMakeFiles/myFem.dir/src/glfem.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/myFem.dir/src/glfem.c.i"
+	/Library/Developer/CommandLineTools/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/glfem.c > CMakeFiles/myFem.dir/src/glfem.c.i
+
+CMakeFiles/myFem.dir/src/glfem.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/myFem.dir/src/glfem.c.s"
+	/Library/Developer/CommandLineTools/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/glfem.c -o CMakeFiles/myFem.dir/src/glfem.c.s
+
 CMakeFiles/myFem.dir/src/homework.c.o: CMakeFiles/myFem.dir/flags.make
 CMakeFiles/myFem.dir/src/homework.c.o: /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/homework.c
 CMakeFiles/myFem.dir/src/homework.c.o: CMakeFiles/myFem.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/myFem.dir/src/homework.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/myFem.dir/src/homework.c.o"
 	/Library/Developer/CommandLineTools/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myFem.dir/src/homework.c.o -MF CMakeFiles/myFem.dir/src/homework.c.o.d -o CMakeFiles/myFem.dir/src/homework.c.o -c /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/homework.c
 
 CMakeFiles/myFem.dir/src/homework.c.i: cmake_force
@@ -103,7 +117,7 @@ CMakeFiles/myFem.dir/src/homework.c.s: cmake_force
 CMakeFiles/myFem.dir/src/main.c.o: CMakeFiles/myFem.dir/flags.make
 CMakeFiles/myFem.dir/src/main.c.o: /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/main.c
 CMakeFiles/myFem.dir/src/main.c.o: CMakeFiles/myFem.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/myFem.dir/src/main.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/myFem.dir/src/main.c.o"
 	/Library/Developer/CommandLineTools/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/myFem.dir/src/main.c.o -MF CMakeFiles/myFem.dir/src/main.c.o.d -o CMakeFiles/myFem.dir/src/main.c.o -c /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/src/main.c
 
 CMakeFiles/myFem.dir/src/main.c.i: cmake_force
@@ -117,6 +131,7 @@ CMakeFiles/myFem.dir/src/main.c.s: cmake_force
 # Object files for target myFem
 myFem_OBJECTS = \
 "CMakeFiles/myFem.dir/src/fem.c.o" \
+"CMakeFiles/myFem.dir/src/glfem.c.o" \
 "CMakeFiles/myFem.dir/src/homework.c.o" \
 "CMakeFiles/myFem.dir/src/main.c.o"
 
@@ -124,12 +139,14 @@ myFem_OBJECTS = \
 myFem_EXTERNAL_OBJECTS =
 
 myFem: CMakeFiles/myFem.dir/src/fem.c.o
+myFem: CMakeFiles/myFem.dir/src/glfem.c.o
 myFem: CMakeFiles/myFem.dir/src/homework.c.o
 myFem: CMakeFiles/myFem.dir/src/main.c.o
 myFem: CMakeFiles/myFem.dir/build.make
-myFem: /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk/usr/lib/libm.tbd
+myFem: glfw/src/libglfw3.a
+myFem: /Users/romainbellens/Documents/GitHub/ElementsFinis/Project/gmsh/gmsh-4.13.1-MacOSARM-sdk/lib/libgmsh.dylib
 myFem: CMakeFiles/myFem.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable myFem"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/romainbellens/Documents/GitHub/ElementsFinis/Project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable myFem"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/myFem.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

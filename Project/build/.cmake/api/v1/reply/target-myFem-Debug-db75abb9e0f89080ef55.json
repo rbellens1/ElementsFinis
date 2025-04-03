@@ -79,11 +79,11 @@
 			[
 				{
 					"backtrace" : 4,
-					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/glfw/include"
+					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/glfw/include"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/gmsh/gmsh-4.13.1-Windows64-sdk/include"
+					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/gmsh/gmsh-4.13.1-Windows64-sdk/include"
 				}
 			],
 			"language" : "C",
@@ -124,7 +124,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "\"C:\\Users\\gabri\\Data\\Bac 3\\Q2\\Elements finis\\Projet\\Interview\\LinearElasticityForces\\gmsh\\gmsh-4.13.1-Windows64-sdk\\lib\\gmsh.lib\"",
+				"fragment" : "\"C:\\Users\\gabri\\Data\\Bac 3\\Q2\\Elements finis\\ElementsFinis\\Project\\gmsh\\gmsh-4.13.1-Windows64-sdk\\lib\\gmsh.lib\"",
 				"role" : "libraries"
 			},
 			{

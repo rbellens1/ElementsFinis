@@ -51,8 +51,7 @@ int main(void)
 
     femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS);
 
-    femElasticityAddBoundaryCondition(theProblem,"Entity 52 ",NEUMANN_Y,-mass*g*100);
-
+    femElasticityAddBoundaryCondition(theProblem,"Entity 52 ",NEUMANN_Y,-mass*g);
 
     femElasticityAddBoundaryCondition(theProblem,"DirichletConstrainRight",DIRICHLET_X,0.0);
     femElasticityAddBoundaryCondition(theProblem,"DirichletConstrainRight",DIRICHLET_Y,0.0);

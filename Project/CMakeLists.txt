@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 project(myFemProject)
 
 set(EXEC_NAME myFem)
@@ -46,6 +46,7 @@ endif(UNIX AND NOT APPLE)
 message("GMSH_INCLUDE_DIR : ${GMSH_INCLUDE_DIR}")
 message("GMSH_LIBRARY : ${GMSH_LIBRARY}")
 include_directories(${GMSH_INCLUDE_DIR})
+
 
 
 # link the aforementioned libraries

@@ -1,0 +1,5 @@
+Type of problem : planar stess
+Young modulus : 240e+12
+Poisson ratio : 0.3
+Mass density : 1.8e+03
+Gravity : 9.8100000e+00

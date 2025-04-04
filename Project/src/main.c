@@ -16,6 +16,84 @@ double fun(double x, double y)
     return 1;
 }
 
+
+
+
+
+
+int read_problem(double *E, double *nu, double *rho, double *g, double *mass, femElasticCase *type){
+
+    
+    FILE *f = fopen("../data/problem.txt", "r");
+    if (f == NULL) {
+        fprintf(stderr, "Error: cannot open file problem.txt\n");
+        return 1;
+    }
+    char problemType[256];
+    // Lecture du type de problème
+    if (fscanf(f, "Type of problem : %[^\n]\n", problemType) != 1) {
+        fprintf(stderr, "Error: cannot read problem type\n");
+        return 1;
+    }
+
+    printf("prob type |%s|\n", problemType);
+
+    // Conversion du texte en type femElasticCase
+    if (strcmp(problemType, "planar stress") == 0) {
+        *type = PLANAR_STRESS;
+    } else if (strcmp(problemType, "planar strain") == 0) {
+        *type = PLANAR_STRAIN;
+    } else if (strcmp(problemType, "axisymetrie") == 0){
+        *type = AXISYM;
+    }else {
+        fprintf(stderr, "Error: unknown problem type\n");
+        return 1;
+    }
+
+    // Lecture des paramètres matériaux
+    if (fscanf(f, "Young modulus : %lf\n", E) != 1) {
+        fprintf(stderr, "Error: cannot read Young modulus\n");
+        return 1;
+    }
+
+    if (fscanf(f, "Poisson ratio : %lf\n", nu) != 1) {
+        fprintf(stderr, "Error: cannot read Poisson ratio\n");
+        return 1;
+    }
+
+    if (fscanf(f, "Mass density : %lf\n", rho) != 1) {
+        fprintf(stderr, "Error: cannot read density\n");
+        return 1;
+    }
+
+    if (fscanf(f, "Gravity : %lf\n", g) != 1) {
+        fprintf(stderr, "Error: cannot read gravity\n");
+        return 1;
+    }
+
+    if (fscanf(f, "Mass : %lf\n", mass) != 1) {
+        fprintf(stderr, "Error: cannot read mass\n");
+        return 1;
+    }
+
+    fclose(f);
+    return 0;
+
+
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
 int main(void)
 {  
     printf("\n\n    V : Mesh and displacement norm \n");
@@ -23,33 +101,31 @@ int main(void)
     printf("    X : Horizontal residuals for unconstrained equations \n");
     printf("    Y : Horizontal residuals for unconstrained equations \n");
     printf("    N : Next domain highlighted\n\n\n");
-
-    double Lx = 1.0;
-    double Ly = 1.0;
       
     geoInitialize();
     femGeo* theGeometry = geoGetGeometry();
     
-    theGeometry->LxPlate     =  Lx;
-    theGeometry->LyPlate     =  Ly;     
-    theGeometry->h           =  Lx * 0.075;    
     theGeometry->elementType = FEM_TRIANGLE;
 
-
     geoMeshRead("../data/mesh.txt");
-    
         
 //
 //  -2- Creation probleme 
 //
-    
-    double E   = 240e+12;
-    double nu  = 0.3;
-    double rho = 1.8e+03; 
-    double g   = 9.81;
-    double mass = 100e+03;
+    double E = 0.0;
+    double nu  = 0.0;
+    double rho = 0.0;
+    double g   = 0.0;
+    double mass = 0.0;
 
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRESS);
+    femElasticCase type = PLANAR_STRESS;
+
+
+    if(read_problem(&E, &nu, &rho, &g, &mass, &type)) return EXIT_FAILURE;
+
+
+
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,type);
 
     femElasticityAddBoundaryCondition(theProblem,"Entity 52 ",NEUMANN_Y,-mass*g);
 
@@ -104,6 +180,14 @@ int main(void)
     printf(" ==== Global horizontal force       : %14.7e [N] \n",theGlobalForce[0]);
     printf(" ==== Global vertical force         : %14.7e [N] \n",theGlobalForce[1]);
     printf(" ==== Weight                        : %14.7e [N] \n", area * rho * g);
+
+
+
+
+
+    // Write out the solution
+    int nNodes = theGeometry->theNodes->nNodes;
+    femSolutionWrite(nNodes, 2, theSoluce, "../data/outfile.txt");
 
 //
 //  -6- Visualisation du maillage

@@ -13,7 +13,7 @@ femGeo theGeometry;
 
 femGeo *geoGetGeometry()                        { return &theGeometry; }
 
-double geoSizeDefault(double x, double y)       { return theGeometry.h; }
+double geoSizeDefault(double x, double y)       { return 1.0; }  //{ return theGeometry.h; }
 
 double geoGmshSize(int dim, int tag, double x, double y, double z, double lc, void *data)
                                                 { return theGeometry.geoSize(x,y);    }
@@ -339,40 +339,40 @@ int geoGetDomain(char *name)
             
 }
 
-void geoMeshGenerate() {
-    femGeo* theGeometry = geoGetGeometry();
+// void geoMeshGenerate() {
+//     femGeo* theGeometry = geoGetGeometry();
 
-    double w = theGeometry->LxPlate;
-    double h = theGeometry->LyPlate;
+//     double w = theGeometry->LxPlate;
+//     double h = theGeometry->LyPlate;
 
-    int ierr;
-    double r = w/4;
-    int idRect = gmshModelOccAddRectangle(0.0,0.0,0.0,w,h,-1,0.0,&ierr); 
-    int idDisk = gmshModelOccAddDisk(w/2.0,h/2.0,0.0,r,r,-1,NULL,0,NULL,0,&ierr); 
-    int idSlit = gmshModelOccAddRectangle(w/2.0,h/2.0-r,0.0,w,2.0*r,-1,0.0,&ierr); 
-    int rect[] = {2,idRect};
-    int disk[] = {2,idDisk};
-    int slit[] = {2,idSlit};
+//     int ierr;
+//     double r = w/4;
+//     int idRect = gmshModelOccAddRectangle(0.0,0.0,0.0,w,h,-1,0.0,&ierr); 
+//     int idDisk = gmshModelOccAddDisk(w/2.0,h/2.0,0.0,r,r,-1,NULL,0,NULL,0,&ierr); 
+//     int idSlit = gmshModelOccAddRectangle(w/2.0,h/2.0-r,0.0,w,2.0*r,-1,0.0,&ierr); 
+//     int rect[] = {2,idRect};
+//     int disk[] = {2,idDisk};
+//     int slit[] = {2,idSlit};
 
-    gmshModelOccCut(rect,2,disk,2,NULL,NULL,NULL,NULL,NULL,-1,1,1,&ierr); 
-    gmshModelOccCut(rect,2,slit,2,NULL,NULL,NULL,NULL,NULL,-1,1,1,&ierr); 
-    gmshModelOccSynchronize(&ierr); 
+//     gmshModelOccCut(rect,2,disk,2,NULL,NULL,NULL,NULL,NULL,-1,1,1,&ierr); 
+//     gmshModelOccCut(rect,2,slit,2,NULL,NULL,NULL,NULL,NULL,-1,1,1,&ierr); 
+//     gmshModelOccSynchronize(&ierr); 
 
-    if (theGeometry->elementType == FEM_QUAD) {
-        gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
-        gmshOptionSetNumber("Mesh.RecombineAll",1,&ierr);
-        gmshOptionSetNumber("Mesh.Algorithm",11,&ierr);  
-        gmshOptionSetNumber("Mesh.SmoothRatio", 21.5, &ierr);  
-        gmshOptionSetNumber("Mesh.RecombinationAlgorithm",1.0,&ierr); 
-        gmshModelGeoMeshSetRecombine(2,1,45,&ierr);  
-        gmshModelMeshGenerate(2,&ierr);  }
+//     if (theGeometry->elementType == FEM_QUAD) {
+//         gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
+//         gmshOptionSetNumber("Mesh.RecombineAll",1,&ierr);
+//         gmshOptionSetNumber("Mesh.Algorithm",11,&ierr);  
+//         gmshOptionSetNumber("Mesh.SmoothRatio", 21.5, &ierr);  
+//         gmshOptionSetNumber("Mesh.RecombinationAlgorithm",1.0,&ierr); 
+//         gmshModelGeoMeshSetRecombine(2,1,45,&ierr);  
+//         gmshModelMeshGenerate(2,&ierr);  }
   
-    if (theGeometry->elementType == FEM_TRIANGLE) {
-        gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
-        gmshModelMeshGenerate(2,&ierr);  }
+//     if (theGeometry->elementType == FEM_TRIANGLE) {
+//         gmshOptionSetNumber("Mesh.SaveAll",1,&ierr);
+//         gmshModelMeshGenerate(2,&ierr);  }
 
-    return;
-}
+//     return;
+// }
 
 static const double _gaussQuad4Xsi[4]    = {-0.577350269189626,-0.577350269189626, 0.577350269189626, 0.577350269189626};
 static const double _gaussQuad4Eta[4]    = { 0.577350269189626,-0.577350269189626,-0.577350269189626, 0.577350269189626};
@@ -901,3 +901,23 @@ void femWarning(char *text, int line, char *file)
     printf("\n  Warning in %s at line %d : \n  %s\n", file, line, text);
     printf("--------------------------------------------------------------------- Yek Yek !! \n\n");                                              
 }
+
+
+
+
+void femSolutionWrite(int nNodes, int nfields, double *data, const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+      printf("Error at %s:%d\nUnable to open file %s\n", __FILE__, __LINE__, filename);
+      exit(-1);
+    }
+    fprintf(file, "Size %d,%d\n", nNodes, nfields);
+    for (int i = 0; i < nNodes; i++) {
+      for (int j = 0; j < nfields - 1; j++) {
+        fprintf(file, "%.18le,", data[i * nfields + j]);
+      }
+      fprintf(file, "%.18le", data[i * nfields + nfields - 1]);
+      fprintf(file, "\n");
+    }
+    fclose(file);
+  }

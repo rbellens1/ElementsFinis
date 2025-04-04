@@ -67,7 +67,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/build"
+			"value" : "c:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/build"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -167,10 +167,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "CXX compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "C:/TDM-GCC-64/bin/g++.exe"
 		},
 		{
@@ -311,10 +311,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "C compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "C:/TDM-GCC-64/bin/gcc.exe"
 		},
 		{
@@ -599,7 +599,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/build/CMakeFiles/pkgRedirects"
+			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/build/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -683,7 +683,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project"
+			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1367,7 +1367,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/build/glfw"
+			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/build/glfw"
 		},
 		{
 			"name" : "GLFW_BUILD_DOCS",
@@ -1439,7 +1439,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/glfw"
+			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/glfw"
 		},
 		{
 			"name" : "GLFW_USE_HYBRID_HPG",
@@ -1651,7 +1651,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/build"
+			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/build"
 		},
 		{
 			"name" : "myFemProject_IS_TOP_LEVEL",
@@ -1675,7 +1675,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project"
+			"value" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces"
 		}
 	],
 	"kind" : "cache",

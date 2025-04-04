@@ -52,8 +52,8 @@ typedef struct {
 } femDomain;
 
 typedef struct {
-    double LxPlate, LyPlate;
-    double h;
+    // double LxPlate, LyPlate;
+    // double h;
     femElementType elementType;
     double (*geoSize)(double x, double y);
     femNodes *theNodes;
@@ -167,6 +167,7 @@ void                femError(char *text, int line, char *file);
 void                femErrorScan(int test, int line, char *file);
 void                femErrorGmsh(int test, int line, char *file);
 void                femWarning(char *text, int line, char *file);
+void                femSolutionWrite(int nNodes, int nfields, double *data, const char *filename);
 
 
 #endif

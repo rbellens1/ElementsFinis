@@ -1,5 +1,5 @@
 #include "fem.h"
-
+#define M_PI 3.14159265358979323846
 
 
 
@@ -41,8 +41,9 @@ void femElasticityAssembleElementsAXI(femProblem *theProblem){
             map[j]  = theMesh->elem[iElem*nLocal+j];
             mapX[j] = 2*map[j];
             mapY[j] = 2*map[j] + 1;
-            x[j]    = theNodes->X[map[j]];
-            y[j]    = theNodes->Y[map[j]];} 
+            x[j]    = theNodes->X[map[j]]; // coordonnée r
+            y[j]    = theNodes->Y[map[j]]; // coordonnée z
+        } 
         
         for (iInteg=0; iInteg < theRule->n; iInteg++) {    
             double xsi    = theRule->xsi[iInteg];
@@ -55,29 +56,47 @@ void femElasticityAssembleElementsAXI(femProblem *theProblem){
             double dxdeta = 0.0;
             double dydxsi = 0.0; 
             double dydeta = 0.0;
+            double r = 0.0;  // Coordonnée radiale au point d'intégration
+            
             for (i = 0; i < theSpace->n; i++) {  
                 dxdxsi += x[i]*dphidxsi[i];       
                 dxdeta += x[i]*dphideta[i];   
                 dydxsi += y[i]*dphidxsi[i];   
-                dydeta += y[i]*dphideta[i]; }
+                dydeta += y[i]*dphideta[i];
+                r += x[i]*phi[i];  // Calcul de r au point d'intégration
+            }
             double jac = fabs(dxdxsi * dydeta - dxdeta * dydxsi);
+            
+            // En axisymétrie, on intègre sur 2πr
+            double dV = 2.0 * M_PI * r * jac * weight;
             
             for (i = 0; i < theSpace->n; i++) {    
                 dphidx[i] = (dphidxsi[i] * dydeta - dphideta[i] * dydxsi) / jac;       
-                dphidy[i] = (dphideta[i] * dxdxsi - dphidxsi[i] * dxdeta) / jac; }            
+                dphidy[i] = (dphideta[i] * dxdxsi - dphidxsi[i] * dxdeta) / jac;
+            }
+            
             for (i = 0; i < theSpace->n; i++) { 
                 for(j = 0; j < theSpace->n; j++) {
                     A[mapX[i]][mapX[j]] += (dphidx[i] * a * dphidx[j] + 
-                                            dphidy[i] * c * dphidy[j]) * jac * weight;                                                                                            
+                                           dphidy[i] * c * dphidy[j]) * dV +
+                                            dphidx[i] * b * phi[j] +
+                                            phi[i] * (b * dphidx[j] + a * phi[j] / r);
+                                           
                     A[mapX[i]][mapY[j]] += (dphidx[i] * b * dphidy[j] + 
-                                            dphidy[i] * c * dphidx[j]) * jac * weight;                                                                                           
+                                           dphidy[i] * c * dphidx[j]) * dV +
+                                           phi[i] * b * dphidy[j];
+                                           
                     A[mapY[i]][mapX[j]] += (dphidy[i] * b * dphidx[j] + 
-                                            dphidx[i] * c * dphidy[j]) * jac * weight;                                                                                            
+                                           dphidx[i] * c * dphidy[j]) * dV +
+                                           dphidy[i] * b * phi[j];
+                                           
                     A[mapY[i]][mapY[j]] += (dphidy[i] * a * dphidy[j] + 
-                                            dphidx[i] * c * dphidx[j]) * jac * weight; }}
-             for (i = 0; i < theSpace->n; i++) {
-                B[mapY[i]] -= phi[i] * g * rho * jac * weight; }}}
-
+                                           dphidx[i] * c * dphidx[j]) * dV;
+                }
+                B[mapY[i]] -= phi[i] * g * rho * dV;
+            }
+        }
+    }
 }
 
 
@@ -297,6 +316,5 @@ double * femElasticityForces(femProblem *theProblem){
 
     return theProblem->residuals;
 }
-
 
 

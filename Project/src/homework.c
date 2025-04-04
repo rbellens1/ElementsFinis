@@ -11,7 +11,7 @@ typedef struct {
 
 syscopy *A_cpy;
 
-
+double *theGlobalCoord;
 
 
 
@@ -145,14 +145,22 @@ void femElasticityAssembleElements(femProblem *theProblem){
     double **A = theSystem->A;
     double *B  = theSystem->B;
     
-    
+    // map contient les numéros de noeuds locaux
+    // mapX et mapY contiennent les numéros de noeuds globaux pour les composantes x et y respectivement
     for (iElem = 0; iElem < theMesh->nElem; iElem++) {
         for (j=0; j < nLocal; j++) {
             map[j]  = theMesh->elem[iElem*nLocal+j];
+            x[j]    = theNodes->X[map[j]];
+            y[j]    = theNodes->Y[map[j]];
+
+
+            // On applique la renumerotation
+            map[j] = theMesh->nodes->number[map[j]];
+            // On fait fois deux car on stocke les valeurs de u et v dans un tableau ligne donc chaque élément (u, v) prend deux cases
+            // Ici la renumerotation est faite automatiquement par map
             mapX[j] = 2*map[j];
             mapY[j] = 2*map[j] + 1;
-            x[j]    = theNodes->X[map[j]];
-            y[j]    = theNodes->Y[map[j]];} 
+        } 
         
         for (iInteg=0; iInteg < theRule->n; iInteg++) {    
             double xsi    = theRule->xsi[iInteg];
@@ -202,6 +210,7 @@ void femElasticityAssembleNeumann(femProblem *theProblem){
     int iBnd,iElem,iInteg,iEdge,i,j,d,map[2],mapU[2];
     int nLocal = 2;
     double *B  = theSystem->B;
+    int *number = theNodes->number;
 
     for(iBnd=0; iBnd < theProblem->nBoundaryConditions; iBnd++){
         femBoundaryCondition *theCondition = theProblem->conditions[iBnd];
@@ -209,6 +218,8 @@ void femElasticityAssembleNeumann(femProblem *theProblem){
         double value = theCondition->value;
 
         int shift=-1;
+        // Le shift permet de savoir si on doit ajouter la force sur la composante x ou y
+        // Comme la première composante est x, le shift est 0 pour NeumannX et 1 pour NeumannY
         if (type == NEUMANN_X)  shift = 0;      
         if (type == NEUMANN_Y)  shift = 1;  
         if (shift == -1) continue; 
@@ -216,9 +227,13 @@ void femElasticityAssembleNeumann(femProblem *theProblem){
             iElem = theCondition->domain->elem[iEdge];
             for (j=0; j < nLocal; j++) {
                 map[j]  = theEdges->elem[iElem*nLocal+j];
-                mapU[j] = 2*map[j] + shift;
                 x[j]    = theNodes->X[map[j]];
-                y[j]    = theNodes->Y[map[j]];} 
+                y[j]    = theNodes->Y[map[j]];
+                map[j] = theEdges->nodes->number[map[j]];
+                mapU[j] = 2*map[j] + shift;
+            } 
+
+                
  
             double jac = sqrt((x[1]-x[0])*(x[1]-x[0]) + (y[1]-y[0])*(y[1]-y[0]))/2.0;
             for (iInteg=0; iInteg < theRule->n; iInteg++) {    
@@ -244,6 +259,8 @@ double *femElasticitySolve(femProblem *theProblem){
     femElasticityAssembleElements(theProblem);
     femElasticityAssembleNeumann(theProblem);
     int size = theProblem->system->size;
+    
+    femSolverCreate(size, theProblem->system, theProblem->solver->type, &theProblem->solver);
 
     A_cpy = malloc(sizeof(syscopy));
     if (A_cpy == NULL) {
@@ -268,11 +285,12 @@ double *femElasticitySolve(femProblem *theProblem){
     for (int i=0; i < size; i++) {
         if (theConstrainedNodes[i] != -1) {
             double value = theProblem->conditions[theConstrainedNodes[i]]->value;
-            femFullSystemConstrain(theProblem->system,i,value); }}
+            femFullSystemConstrain(theProblem->system,2*theProblem->geometry->theElements->nodes->number[i/2]+i%2,value); }}
 
-    femFullSystemEliminate(theProblem->system);
+    double *sol = femFullSystemEliminate(theProblem->system);
 
-    memcpy(theProblem->soluce, theProblem->system->B, sizeof(double) * size);
+    for (int i = 0; i < theProblem->system->size; i++)
+        theProblem->soluce[i] = sol[2*theProblem->geometry->theElements->nodes->number[i/2]+i%2];
     
      return theProblem->soluce;
 }
@@ -283,28 +301,21 @@ double * femElasticityForces(femProblem *theProblem){
     // A completer :-) 
     //  
 
-
     femFullSystem  *theSystem = theProblem->system;
-    //femFullSystemInit(theSystem);
-    //femElasticityAssembleElements(theProblem);
     femElasticityAssembleNeumann(theProblem);
-
 
     double **A = A_cpy->A;
     double *soluce = theProblem->soluce;
     double *residuals = theProblem->residuals;
-    //double *B = theProblem->system->B;
     int size = A_cpy->size;
 
     for (int i = 0; i < size; i++)
     {
-        //residuals[i] = 0.0;
         for (int j = 0; j < size; j++)
         {
             residuals[i] += A[i][j] * soluce[j];
         }
     }
-
 
     for (int i = 0; i < A_cpy->size; i++)
     {
@@ -318,3 +329,62 @@ double * femElasticityForces(femProblem *theProblem){
 }
 
 
+
+
+
+
+
+int compare(const void *nodeOne, const void *nodeTwo) 
+{
+    int *iOne = (int *)nodeOne;
+    int *iTwo = (int *)nodeTwo;
+    double diff = theGlobalCoord[*iOne] - theGlobalCoord[*iTwo];
+    if (diff < 0)    return  1;
+    if (diff > 0)    return -1;
+    return  0;  
+}
+
+
+
+
+void femMeshRenumber(femMesh *theMesh, femRenumType renumType)
+{
+    int i, *inverse;
+    femNodes *theNodes = theMesh->nodes;
+    int nNodes = theNodes->nNodes;
+    theNodes->number = malloc(sizeof(int)*nNodes);
+
+
+    int *number = theNodes->number;
+    if (number == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    switch (renumType) {
+        case FEM_NO :
+            for (i = 0; i < nNodes; i++) 
+                number[i] = i;
+            break;
+        case FEM_XNUM : 
+            inverse = malloc(sizeof(int)*nNodes);
+            for (i = 0; i < nNodes; i++) 
+                inverse[i] = i; 
+            theGlobalCoord = theNodes->X;
+            qsort(inverse, nNodes, sizeof(int), compare);
+            for (i = 0; i < nNodes; i++)
+                number[inverse[i]] = i;
+            free(inverse);
+            break;
+        case FEM_YNUM : 
+            inverse = malloc(sizeof(int)*nNodes);
+            for (i = 0; i < nNodes; i++) 
+                inverse[i] = i; 
+            theGlobalCoord = theNodes->Y;
+            qsort(inverse, nNodes, sizeof(int), compare);
+            for (i = 0; i < nNodes; i++)
+                number[inverse[i]] = i;
+            free(inverse);  
+            break;
+        default : Error("Unexpected renumbering option"); }
+}

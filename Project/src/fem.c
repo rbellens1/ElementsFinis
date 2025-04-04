@@ -265,6 +265,7 @@ void geoMeshRead(const char *filename)
    
    femNodes *theNodes = malloc(sizeof(femNodes));
    theGeometry.theNodes = theNodes;
+   theNodes->number = (int *)malloc(sizeof(int)*theNodes->nNodes);
    ErrorScan(fscanf(file, "Number of nodes %d \n", &theNodes->nNodes));
    theNodes->X = malloc(sizeof(double)*(theNodes->nNodes));
    theNodes->Y = malloc(sizeof(double)*(theNodes->nNodes));
@@ -581,14 +582,43 @@ void femDiscretePrint(femDiscrete *mySpace)
             printf(" \n"); }}   
 }
 
+
+
+
 femFullSystem *femFullSystemCreate(int size)
 {
     femFullSystem *theSystem = malloc(sizeof(femFullSystem));
-    femFullSystemAlloc(theSystem, size);
+    theSystem->A = malloc(sizeof(double*) * size); 
+    theSystem->B = malloc(sizeof(double) * size * (size+1));
+    theSystem->A[0] = theSystem->B + size;  
+    theSystem->size = size;
+    int i;
+    for (i=1 ; i < size ; i++) 
+        theSystem->A[i] = theSystem->A[i-1] + size;
     femFullSystemInit(theSystem);
 
     return theSystem; 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+// femFullSystem *femFullSystemCreate(int size)
+// {
+//     femFullSystem *theSystem = malloc(sizeof(femFullSystem));
+//     femFullSystemAlloc(theSystem, size);
+//     femFullSystemInit(theSystem);
+
+//     return theSystem; 
+// }
 
 void femFullSystemFree(femFullSystem *theSystem)
 {
@@ -688,7 +718,7 @@ void  femFullSystemConstrain(femFullSystem *mySystem,
 
 
 femProblem *femElasticityCreate(femGeo* theGeometry, 
-                  double E, double nu, double rho, double g, femElasticCase iCase)
+                  double E, double nu, double rho, double g, femElasticCase iCase, femSolverType solverType, femRenumType renumType)
 {
     femProblem *theProblem = malloc(sizeof(femProblem));
     theProblem->E   = E;
@@ -696,6 +726,9 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
     theProblem->g   = g;
     theProblem->rho = rho;
     theProblem->iCase = iCase;
+
+    theProblem->solver = malloc(sizeof(femSolver));
+    theProblem->solver->type = solverType;
     
     if (iCase == PLANAR_STRESS) {
         theProblem->A = E/(1-nu*nu);
@@ -729,11 +762,14 @@ femProblem *femElasticityCreate(femGeo* theGeometry,
         theProblem->space    = femDiscreteCreate(4,FEM_QUAD);
         theProblem->rule     = femIntegrationCreate(4,FEM_QUAD); }
     theProblem->spaceEdge    = femDiscreteCreate(2,FEM_EDGE);
-    theProblem->ruleEdge     = femIntegrationCreate(2,FEM_EDGE); 
+    theProblem->ruleEdge     = femIntegrationCreate(2,FEM_EDGE);
+
+
+    femMeshRenumber(theGeometry->theElements,renumType);
     theProblem->system       = femFullSystemCreate(size); 
 
-    femDiscretePrint(theProblem->space);   
-    femDiscretePrint(theProblem->spaceEdge);  
+    // femDiscretePrint(theProblem->space);   
+    // femDiscretePrint(theProblem->spaceEdge);  
   
     return theProblem;
 }
@@ -921,3 +957,96 @@ void femSolutionWrite(int nNodes, int nfields, double *data, const char *filenam
     }
     fclose(file);
   }
+
+
+double femFullSystemGet(femFullSystem* myFullSystem, int myRow, int myCol)
+{   
+    return(myFullSystem->A[myRow][myCol]); 
+}
+  
+
+double femBandSystemGet(femBandSystem* myBandSystem, int myRow, int myCol)
+{
+    double value = 0;
+    if (myCol >= myRow && myCol < myRow+myBandSystem->band)  value = myBandSystem->A[myRow][myCol]; 
+    return(value);
+}
+
+
+double femSolverGet(femSolver *mySolver,int i,int j)
+  {
+      double value = 0;
+      switch (mySolver->type) {
+          case FEM_FULL : value = femFullSystemGet((femFullSystem *)mySolver->solver,i,j); break;
+          case FEM_BAND : value = femBandSystemGet((femBandSystem *)mySolver->solver,i,j); break;
+          case FEM_ITER : value = (i==j); break;
+          default : Error("Unexpected solver type"); }
+      return(value);
+  }
+
+
+
+
+femFullSystem * copy_system(femFullSystem *system_to_copy, int size){
+
+    femFullSystem * sys_cpy = (femFullSystem *) malloc(sizeof(femFullSystem));
+    
+    sys_cpy->A = (double **) malloc(sizeof(double*)*size);
+    for (int i = 0; i < size; i++)
+    {
+        (sys_cpy->A)[i] = (double *) malloc(sizeof(double)*size);
+        memcpy((sys_cpy->A)[i], (system_to_copy->A)[i], sizeof(double)* size);
+    }
+
+    sys_cpy->B = (double *) malloc(sizeof(double)* size);
+
+    memcpy( sys_cpy->B, system_to_copy->B, sizeof(double)* size);
+
+}
+
+
+void femSolverCreate(int sizeLoc, femFullSystem *system_to_copy, femSolverType solverType, femSolver **mySolver)
+{
+    *mySolver = malloc(sizeof(femSolver));
+    (*mySolver)->type = solverType;
+    (*mySolver)->solver = (femFullSystem *) system_to_copy;
+    (*mySolver)->local = (femFullSystem *) malloc(sizeof(femFullSystem));
+    (*mySolver)->local->A = (double **) malloc(sizeof(double*)*sizeLoc);
+    for (int i = 0; i < sizeLoc; i++)
+    {
+        (*mySolver)->local->A[i] = (double *) malloc(sizeof(double)*sizeLoc);
+        memcpy((*mySolver)->local->A[i], system_to_copy->A[i], sizeof(double)* sizeLoc);
+    }
+    (*mySolver)->local->B = (double *) malloc(sizeof(double)* sizeLoc);
+    memcpy((*mySolver)->local->B, system_to_copy->B, sizeof(double)* sizeLoc);
+
+}
+// {
+
+
+//     femSolver *mySolver =
+
+//     printf("Ok 0\n");
+//     fflush(stdout);
+
+//     printf("Ok 1\n");
+
+//     int size = system_to_copy->size;
+//     mySolver->type = solverType;
+//     printf("Ok 2\n");
+//     femFullSystem * sys_cpy = copy_system(system_to_copy, size);
+//     printf("Ok 3\n");
+//     mySolver->local = sys_cpy;
+    
+//     mySolver->solver = (femFullSystem *) sys_cpy;
+//     printf("Ok 3\n");
+//     return (mySolver);
+// }
+
+femSolver *femSolverFullCreate(int size, femFullSystem *system)
+{
+    femSolver *mySolver = malloc(sizeof(femSolver));
+    mySolver->type = FEM_FULL;
+    mySolver->solver = (femFullSystem *) system;
+    return(mySolver);
+}

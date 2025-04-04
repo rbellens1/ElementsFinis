@@ -98,15 +98,15 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/glfw/include"
+					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/glfw/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/glfw/src"
+					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/glfw/src"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/build/glfw/src"
+					"path" : "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/build/glfw/src"
 				}
 			],
 			"language" : "C",

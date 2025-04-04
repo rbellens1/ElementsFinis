@@ -1,1 +1,1 @@
- glfw/src/libglfw3.a -lopengl32 "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/gmsh/gmsh-4.13.1-Windows64-sdk/lib/gmsh.lib" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
+ glfw/src/libglfw3.a -lopengl32 "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/gmsh/gmsh-4.13.1-Windows64-sdk/lib/gmsh.lib" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

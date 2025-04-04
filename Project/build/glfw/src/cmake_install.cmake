@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/glfw/src
+# Install script for directory: C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/glfw/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,6 +40,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/Projet/Interview/LinearElasticityForces/build/glfw/src/install_local_manifest.txt"
+  file(WRITE "C:/Users/gabri/Data/Bac 3/Q2/Elements finis/ElementsFinis/Project/build/glfw/src/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

@@ -101,6 +101,7 @@ int main(void)
     printf("    X : Horizontal residuals for unconstrained equations \n");
     printf("    Y : Horizontal residuals for unconstrained equations \n");
     printf("    N : Next domain highlighted\n\n\n");
+    printf("    S : Spy matrix \n");
       
     geoInitialize();
     femGeo* theGeometry = geoGetGeometry();
@@ -119,13 +120,14 @@ int main(void)
     double mass = 0.0;
 
     femElasticCase type = PLANAR_STRESS;
-
+    femSolverType solverType = FEM_FULL;
+    femRenumType  renumType  = FEM_YNUM;
 
     if(read_problem(&E, &nu, &rho, &g, &mass, &type)) return EXIT_FAILURE;
 
 
 
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,type);
+    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,type, solverType, renumType);
 
     femElasticityAddBoundaryCondition(theProblem,"Entity 52 ",NEUMANN_Y,-mass*g);
 
@@ -151,7 +153,7 @@ int main(void)
 //
     
     femNodes *theNodes = theGeometry->theNodes;
-    double deformationFactor = 1e5;
+    double deformationFactor = 1e4;
     double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
     double *forcesX = malloc(theNodes->nNodes * sizeof(double));
     double *forcesY = malloc(theNodes->nNodes * sizeof(double));
@@ -172,6 +174,8 @@ int main(void)
 //
 //  -5- Calcul de la force globaleresultante
 //
+
+    printf("Aera : %14.7e [m2] \n", area);
 
     double theGlobalForce[2] = {0, 0};
     for (int i=0; i<theProblem->geometry->theNodes->nNodes; i++) {
@@ -199,7 +203,10 @@ int main(void)
     double t, told = 0;
     char theMessage[MAXNAME];
    
- 
+    femSolverType newSolverType = solverType;
+    femRenumType  newRenumType  = renumType;
+    femMesh *theMesh = theProblem->geometry->theElements;
+
     GLFWwindow* window = glfemInit("EPL1110 : Recovering forces on constrained nodes");
     glfwMakeContextCurrent(window);
 
@@ -213,6 +220,10 @@ int main(void)
         if (glfwGetKey(window,'V') == GLFW_PRESS) { mode = 1;}
         if (glfwGetKey(window,'X') == GLFW_PRESS) { mode = 2;}
         if (glfwGetKey(window,'Y') == GLFW_PRESS) { mode = 3;}
+        if (glfwGetKey(window,'S') == GLFW_PRESS) { mode = 4;}
+        if (glfwGetKey(window,'W') == GLFW_PRESS)   newRenumType  = FEM_XNUM;
+        if (glfwGetKey(window,'T') == GLFW_PRESS)   newRenumType  = FEM_YNUM;
+        if (glfwGetKey(window,'R') == GLFW_PRESS)   newRenumType  = FEM_NO; 
         if (glfwGetKey(window,'N') == GLFW_PRESS && freezingButton == FALSE) { domain++; freezingButton = TRUE; told = t;}
         if (t-told > 0.5) {freezingButton = FALSE; }
         
@@ -221,21 +232,45 @@ int main(void)
             glfemPlotDomain( theGeometry->theDomains[domain]); 
             sprintf(theMessage, "%s : %d ",theGeometry->theDomains[domain]->name,domain);
             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-        if (mode == 1) {
+        else if (mode == 1) {
             glfemPlotField(theGeometry->theElements,normDisplacement);
             glfemPlotMesh(theGeometry->theElements); 
             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-        if (mode == 2) {
+        else if (mode == 2) {
             glfemPlotField(theGeometry->theElements,forcesX);
             glfemPlotMesh(theGeometry->theElements); 
             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
-        if (mode == 3) {
+        else if (mode == 3) {
             glfemPlotField(theGeometry->theElements,forcesY);
             glfemPlotMesh(theGeometry->theElements); 
             sprintf(theMessage, "Number of elements : %d ",theGeometry->theElements->nElem);
             glColor3f(1.0,0.0,0.0); glfemMessage(theMessage); }
+        else if(mode == 4) {
+            glfemPlotSolver(theProblem->solver,theProblem->system->size,w,h);
+            glColor3f(1.0,0.0,0.0);
+        } 
+        
+        if (solverType != newSolverType || renumType != newRenumType) { 
+            solverType = newSolverType;
+            renumType = newRenumType;
+            femElasticityFree(theProblem);
+            theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,type, solverType, renumType);
+            theMesh = theProblem->geometry->theElements;
+            femElasticitySolve(theProblem);
+            switch (renumType) {
+                case FEM_XNUM : printf("    Renumbering along the x-direction\n"); break;
+                case FEM_YNUM : printf("    Renumbering along the y-direction\n"); break;
+                case FEM_NO : printf("    No Renumbering\n"); break;
+                default : break; }
+            printf("    Maximum value : %.4f\n", femMax(theProblem->soluce,theProblem->system->size));
+            fflush(stdout); }
+
+
+
+
+        
          glfwSwapBuffers(window);
          glfwPollEvents();
     } while( glfwGetKey(window,GLFW_KEY_ESCAPE) != GLFW_PRESS &&
@@ -243,6 +278,8 @@ int main(void)
             
     // Check if the ESC key was pressed or the window was closed
 
+
+    free(theProblem->geometry->theNodes->number);
     free(normDisplacement);
     free(forcesX);
     free(forcesY);
@@ -253,5 +290,3 @@ int main(void)
     exit(EXIT_SUCCESS);
     return 0;  
 }
-
- 

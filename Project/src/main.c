@@ -121,7 +121,7 @@ int main(void)
 
     femElasticCase type = PLANAR_STRESS;
     femSolverType solverType = FEM_FULL;
-    femRenumType  renumType  = FEM_YNUM;
+    femRenumType  renumType  = FEM_NO;
 
     if(read_problem(&E, &nu, &rho, &g, &mass, &type)) return EXIT_FAILURE;
 
@@ -174,8 +174,6 @@ int main(void)
 //
 //  -5- Calcul de la force globaleresultante
 //
-
-    printf("Aera : %14.7e [m2] \n", area);
 
     double theGlobalForce[2] = {0, 0};
     for (int i=0; i<theProblem->geometry->theNodes->nNodes; i++) {
